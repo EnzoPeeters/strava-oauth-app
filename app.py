@@ -6,36 +6,73 @@ never commit them to the repo):
     STRAVA_CLIENT_ID
     STRAVA_CLIENT_SECRET
     REDIRECT_URI       (e.g. https://your-app-name.onrender.com/callback)
+    DATABASE_URL        (Postgres connection string, e.g. from Neon)
 
 Locally, you can still test this with:
     export STRAVA_CLIENT_ID=249346
     export STRAVA_CLIENT_SECRET=your_secret
     export REDIRECT_URI=http://localhost:8000/callback
+    export DATABASE_URL=postgresql://...
     python app.py
 """
 
-import csv
 import os
 
+import psycopg2
 import requests
 from flask import Flask, request
 
 CLIENT_ID = os.environ["STRAVA_CLIENT_ID"]
 CLIENT_SECRET = os.environ["STRAVA_CLIENT_SECRET"]
 REDIRECT_URI = os.environ["REDIRECT_URI"]
+DATABASE_URL = os.environ["DATABASE_URL"]
 SCOPE = "activity:read_all"
-TOKENS_FILE = "tokens.csv"
 
 app = Flask(__name__)
 
 
-def save_token_row(athlete_id, refresh_token, access_token, expires_at):
-    file_exists = os.path.isfile(TOKENS_FILE)
-    with open(TOKENS_FILE, "a", newline="") as f:
-        writer = csv.writer(f)
-        if not file_exists:
-            writer.writerow(["athlete_id", "refresh_token", "access_token", "expires_at"])
-        writer.writerow([athlete_id, refresh_token, access_token, expires_at])
+def get_db_connection():
+    return psycopg2.connect(DATABASE_URL)
+
+
+def init_db():
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS tokens (
+                    athlete_id BIGINT PRIMARY KEY,
+                    athlete_name TEXT,
+                    refresh_token TEXT NOT NULL,
+                    access_token TEXT NOT NULL,
+                    expires_at BIGINT NOT NULL,
+                    updated_at TIMESTAMP DEFAULT NOW()
+                )
+                """
+            )
+        conn.commit()
+
+
+def save_token_row(athlete_id, athlete_name, refresh_token, access_token, expires_at):
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO tokens (athlete_id, athlete_name, refresh_token, access_token, expires_at, updated_at)
+                VALUES (%s, %s, %s, %s, %s, NOW())
+                ON CONFLICT (athlete_id) DO UPDATE SET
+                    athlete_name = EXCLUDED.athlete_name,
+                    refresh_token = EXCLUDED.refresh_token,
+                    access_token = EXCLUDED.access_token,
+                    expires_at = EXCLUDED.expires_at,
+                    updated_at = NOW()
+                """,
+                (athlete_id, athlete_name, refresh_token, access_token, expires_at),
+            )
+        conn.commit()
+
+
+init_db()
 
 
 @app.route("/")
@@ -85,7 +122,7 @@ def callback():
     access_token = data["access_token"]
     expires_at = data["expires_at"]
 
-    save_token_row(athlete_id, refresh_token, access_token, expires_at)
+    save_token_row(athlete_id, athlete_name, refresh_token, access_token, expires_at)
 
     return (
         "<h2>Success!</h2>"
@@ -96,14 +133,19 @@ def callback():
 
 @app.route("/debug-tokens")
 def debug_tokens():
-    # TEMPORARY: lets you view tokens.csv in the browser since Render's
+    # TEMPORARY: lets you view stored rows in the browser since Render's
     # free tier has no shell access. Remove this route before the real
     # 500-person run — it exposes refresh tokens to anyone with the URL.
-    if not os.path.isfile(TOKENS_FILE):
-        return "No tokens.csv file yet — no one has authorized."
-    with open(TOKENS_FILE) as f:
-        content = f.read()
-    return f"<pre>{content}</pre>"
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT athlete_id, athlete_name, expires_at, updated_at FROM tokens ORDER BY updated_at DESC"
+            )
+            rows = cur.fetchall()
+    if not rows:
+        return "No rows yet — no one has authorized."
+    lines = [f"{r[0]} | {r[1]} | expires_at={r[2]} | updated_at={r[3]}" for r in rows]
+    return "<pre>" + "\n".join(lines) + "</pre>"
 
 
 if __name__ == "__main__":
