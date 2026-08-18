@@ -1,8 +1,10 @@
 {
   "athlete_id": 37902018,
   "week": "2026-W34",
-  "total_moving_time_seconds": 0,
-  "activity_count": 0,
-  "by_type": {},
-  "updated_at": "2026-08-18T13:13:27.395926+00:00"
+  "total_moving_time_seconds": 3281,
+  "activity_count": 1,
+  "by_type": {
+    "Run": 3281
+  },
+  "updated_at": "2026-08-18T18:33:27.247768+00:00"
 }

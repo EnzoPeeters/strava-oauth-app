@@ -1,10 +1,11 @@
 {
   "athlete_id": 81471647,
   "week": "2026-W34",
-  "total_moving_time_seconds": 6115,
-  "activity_count": 1,
+  "total_moving_time_seconds": 12953,
+  "activity_count": 2,
   "by_type": {
+    "TrailRun": 6838,
     "Run": 6115
   },
-  "updated_at": "2026-08-18T13:13:25.253394+00:00"
+  "updated_at": "2026-08-18T18:33:25.904627+00:00"
 }
