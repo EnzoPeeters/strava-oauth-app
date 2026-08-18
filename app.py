@@ -94,6 +94,18 @@ def callback():
     )
 
 
+@app.route("/debug-tokens")
+def debug_tokens():
+    # TEMPORARY: lets you view tokens.csv in the browser since Render's
+    # free tier has no shell access. Remove this route before the real
+    # 500-person run — it exposes refresh tokens to anyone with the URL.
+    if not os.path.isfile(TOKENS_FILE):
+        return "No tokens.csv file yet — no one has authorized."
+    with open(TOKENS_FILE) as f:
+        content = f.read()
+    return f"<pre>{content}</pre>"
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
