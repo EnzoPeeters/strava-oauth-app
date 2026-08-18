@@ -131,23 +131,6 @@ def callback():
     )
 
 
-@app.route("/debug-tokens")
-def debug_tokens():
-    # TEMPORARY: lets you view stored rows in the browser since Render's
-    # free tier has no shell access. Remove this route before the real
-    # 500-person run — it exposes refresh tokens to anyone with the URL.
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT athlete_id, athlete_name, expires_at, updated_at FROM tokens ORDER BY updated_at DESC"
-            )
-            rows = cur.fetchall()
-    if not rows:
-        return "No rows yet — no one has authorized."
-    lines = [f"{r[0]} | {r[1]} | expires_at={r[2]} | updated_at={r[3]}" for r in rows]
-    return "<pre>" + "\n".join(lines) + "</pre>"
-
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
