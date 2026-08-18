@@ -52,6 +52,24 @@ def ensure_weekly_totals_table(conn):
     conn.commit()
 
 
+def ensure_activities_table(conn):
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS activities (
+                strava_activity_id BIGINT PRIMARY KEY,
+                athlete_id BIGINT NOT NULL,
+                sport_type TEXT,
+                moving_time_seconds INT NOT NULL,
+                start_date TIMESTAMP,
+                iso_week TEXT NOT NULL,
+                last_updated TIMESTAMP DEFAULT NOW()
+            )
+            """
+        )
+    conn.commit()
+
+
 def fetch_all_athletes(conn):
     with conn.cursor() as cur:
         cur.execute("SELECT athlete_id, athlete_name, refresh_token FROM tokens")
@@ -103,6 +121,32 @@ def get_activities_in_range(access_token, after_ts, before_ts):
     return activities
 
 
+def upsert_activities(conn, athlete_id, iso_week, activities):
+    with conn.cursor() as cur:
+        for a in activities:
+            cur.execute(
+                """
+                INSERT INTO activities
+                    (strava_activity_id, athlete_id, sport_type, moving_time_seconds, start_date, iso_week, last_updated)
+                VALUES (%s, %s, %s, %s, %s, %s, NOW())
+                ON CONFLICT (strava_activity_id) DO UPDATE SET
+                    sport_type = EXCLUDED.sport_type,
+                    moving_time_seconds = EXCLUDED.moving_time_seconds,
+                    start_date = EXCLUDED.start_date,
+                    last_updated = NOW()
+                """,
+                (
+                    a["id"],
+                    athlete_id,
+                    a.get("sport_type", a.get("type")),
+                    a["moving_time"],
+                    a.get("start_date"),
+                    iso_week,
+                ),
+            )
+    conn.commit()
+
+
 def upsert_weekly_total(conn, athlete_id, iso_week, week_start_date, total_seconds, activity_count):
     with conn.cursor() as cur:
         cur.execute(
@@ -120,7 +164,7 @@ def upsert_weekly_total(conn, athlete_id, iso_week, week_start_date, total_secon
     conn.commit()
 
 
-def write_output_file(athlete_id, iso_week, total_seconds, activity_count):
+def write_output_file(athlete_id, iso_week, total_seconds, activity_count, by_type):
     person_dir = os.path.join(OUTPUT_DIR, str(athlete_id))
     os.makedirs(person_dir, exist_ok=True)
     filepath = os.path.join(person_dir, f"{iso_week}.json")
@@ -131,6 +175,7 @@ def write_output_file(athlete_id, iso_week, total_seconds, activity_count):
                 "week": iso_week,
                 "total_moving_time_seconds": total_seconds,
                 "activity_count": activity_count,
+                "by_type": by_type,
                 "updated_at": datetime.now(timezone.utc).isoformat(),
             },
             f,
@@ -141,6 +186,7 @@ def write_output_file(athlete_id, iso_week, total_seconds, activity_count):
 def main():
     conn = get_db_connection()
     ensure_weekly_totals_table(conn)
+    ensure_activities_table(conn)
 
     athletes = fetch_all_athletes(conn)
     print(f"Found {len(athletes)} authorized athlete(s).")
@@ -167,10 +213,16 @@ def main():
             total_seconds = sum(a["moving_time"] for a in activities)
             activity_count = len(activities)
 
+            by_type = {}
+            for a in activities:
+                sport = a.get("sport_type", a.get("type", "Unknown"))
+                by_type[sport] = by_type.get(sport, 0) + a["moving_time"]
+
+            upsert_activities(conn, athlete_id, iso_week, activities)
             upsert_weekly_total(
                 conn, athlete_id, iso_week, week_start.date(), total_seconds, activity_count
             )
-            write_output_file(athlete_id, iso_week, total_seconds, activity_count)
+            write_output_file(athlete_id, iso_week, total_seconds, activity_count, by_type)
 
             print(f"  {activity_count} activities, {total_seconds}s total moving time.")
 
