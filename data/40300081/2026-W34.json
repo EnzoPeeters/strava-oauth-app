@@ -1,10 +1,11 @@
 {
   "athlete_id": 40300081,
   "week": "2026-W34",
-  "total_moving_time_seconds": 3626,
-  "activity_count": 2,
+  "total_moving_time_seconds": 5437,
+  "activity_count": 3,
   "by_type": {
+    "Ride": 1811,
     "WeightTraining": 3626
   },
-  "updated_at": "2026-08-20T04:58:35.323010+00:00"
+  "updated_at": "2026-08-21T04:59:00.176635+00:00"
 }
