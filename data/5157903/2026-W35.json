@@ -1,8 +1,10 @@
 {
   "athlete_id": 5157903,
   "week": "2026-W35",
-  "total_moving_time_seconds": 0,
-  "activity_count": 0,
-  "by_type": {},
-  "updated_at": "2026-08-24T05:24:15.269643+00:00"
+  "total_moving_time_seconds": 1899,
+  "activity_count": 1,
+  "by_type": {
+    "Swim": 1899
+  },
+  "updated_at": "2026-08-25T04:59:56.475227+00:00"
 }
