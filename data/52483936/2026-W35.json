@@ -1,8 +1,11 @@
 {
   "athlete_id": 52483936,
   "week": "2026-W35",
-  "total_moving_time_seconds": 0,
-  "activity_count": 0,
-  "by_type": {},
-  "updated_at": "2026-08-25T04:59:58.870764+00:00"
+  "total_moving_time_seconds": 8745,
+  "activity_count": 2,
+  "by_type": {
+    "TrailRun": 7229,
+    "Run": 1516
+  },
+  "updated_at": "2026-08-26T05:01:59.615025+00:00"
 }
