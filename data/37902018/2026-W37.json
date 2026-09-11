@@ -1,11 +1,12 @@
 {
   "athlete_id": 37902018,
   "week": "2026-W37",
-  "total_moving_time_seconds": 11344,
-  "activity_count": 2,
+  "total_moving_time_seconds": 17471,
+  "activity_count": 5,
   "by_type": {
-    "Run": 2962,
+    "Run": 6204,
+    "EBikeRide": 2885,
     "Ride": 8382
   },
-  "updated_at": "2026-09-10T07:34:22.408301+00:00"
+  "updated_at": "2026-09-11T07:32:53.490274+00:00"
 }
