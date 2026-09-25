@@ -1,11 +1,11 @@
 {
   "athlete_id": 37902018,
   "week": "2026-W39",
-  "total_moving_time_seconds": 25305,
-  "activity_count": 6,
+  "total_moving_time_seconds": 41650,
+  "activity_count": 7,
   "by_type": {
-    "Walk": 20604,
+    "Walk": 36949,
     "Tennis": 4701
   },
-  "updated_at": "2026-09-24T07:53:02.109650+00:00"
+  "updated_at": "2026-09-25T08:15:51.959933+00:00"
 }
