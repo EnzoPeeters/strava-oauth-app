@@ -1,12 +1,12 @@
 {
   "athlete_id": 5157903,
   "week": "2026-W41",
-  "total_moving_time_seconds": 13569,
-  "activity_count": 4,
+  "total_moving_time_seconds": 17769,
+  "activity_count": 5,
   "by_type": {
+    "Ride": 11690,
     "Swim": 2409,
-    "Run": 3670,
-    "Ride": 7490
+    "Run": 3670
   },
-  "updated_at": "2026-10-08T09:37:53.484367+00:00"
+  "updated_at": "2026-10-09T09:44:23.540472+00:00"
 }
