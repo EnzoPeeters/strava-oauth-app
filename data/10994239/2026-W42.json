@@ -1,11 +1,12 @@
 {
   "athlete_id": 10994239,
   "week": "2026-W42",
-  "total_moving_time_seconds": 10149,
-  "activity_count": 3,
+  "total_moving_time_seconds": 16032,
+  "activity_count": 4,
   "by_type": {
+    "Ride": 5883,
     "Run": 7074,
     "VirtualRide": 3075
   },
-  "updated_at": "2026-10-17T07:15:18.407812+00:00"
+  "updated_at": "2026-10-18T07:29:15.260854+00:00"
 }
