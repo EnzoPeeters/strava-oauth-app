@@ -1,10 +1,10 @@
 {
   "athlete_id": 52483936,
   "week": "2026-W48",
-  "total_moving_time_seconds": 7605,
-  "activity_count": 3,
+  "total_moving_time_seconds": 14284,
+  "activity_count": 5,
   "by_type": {
-    "Run": 7605
+    "Run": 14284
   },
-  "updated_at": "2026-11-25T11:50:22.563187+00:00"
+  "updated_at": "2026-11-26T11:38:41.479764+00:00"
 }
